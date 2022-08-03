@@ -1,0 +1,28 @@
+---
+- name: Smoke test the environment.
+  fail:
+    msg: "Could not find Pantheon Backup, or missing required parameters"
+  when:
+    - pantheon_backup | default({}) | length < 1
+    - pantheon_backup.sources | default([]) | length < 1
+    - pantheon_backup.destinations | default([]) | length < 1
+    - pantheon_backup.backups | default([]) | length < 1
+
+- name: Create a temp directory to hold the backup
+  tempfile:
+    state: directory
+    prefix: "pantheon-backup"
+  register: _run_temp_dir
+  notify:
+    - delete temp items
+    
+- name: Do backup
+  include_tasks: "backup.yml"
+  loop: "{{ pantheon_backup.backups }}"
+  loop_control:
+    extended: yes
+    label: "{{ _backup.name | default(ansible_loop.index0) }}"
+    loop_var: _backup
+  when:
+    - _backup.disabled | default(false) != true
+

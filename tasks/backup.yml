@@ -1,0 +1,106 @@
+---
+- name: Ensure the backup has required parameters
+  fail:
+    msg: "Could not find Pantheon Backup, or missing required parameters"
+  when:
+    - _backup.source | default('') == ''
+    - _backup.env | default('') == ''
+    - _backup.element | default('') == ''
+    - _backup.remotes | default([]) | length < 1
+
+- debug: var=_backup
+
+- name: Check if the source configuration exists
+  fail:
+    msg: "Could not find source configuration {{ _backup.source }}"
+  when:
+    - pantheon_backup.sources[_backup.source] is not defined
+
+- name: Get the source configuration
+  set_fact:
+    _source: "{{ pantheon_backup.sources[_backup.source] }}"
+
+- name: Check if the machine token is specified
+  fail:
+    msg: "Could not find Pantheon machine token for {{ _backup.source }}"
+  when:
+    - _source.machineTokenFile is not defined
+    - _source.machineToken is not defined
+    
+- name: Authenticate with Pantheon
+  shell: >
+    terminus auth:login
+    --machine-token={{ _auth }}
+    {% if (pantheon_backup.debug | default(false)) != true %}
+    --quiet
+    {% elif lookup('env', 'ANSIBLE_VERBOSITY') == 4 %}
+    -vvv
+    {% endif %}
+    --no-interaction
+    --yes
+  register: _pantheon_login_result
+  until: _pantheon_login_result.rc == 0
+  retries: "{{ _source.retryCount | default(3) }}"
+  delay: "{{ _source.retryDelay | default(30) }}"
+  vars:
+    _auth: "\
+      {% if _source.machineTokenFile is defined %}\
+      {{ lookup('file', _source.machineTokenFile) }}\
+      {% else %}\
+      {{ _source.machineToken }}\
+      {% endif %}"
+
+- name: Generate the backup file prefix and suffix
+  set_fact:
+    _backup_file_prefix: "{{ _source.site_id }}.{{ _backup.env }}.{{ _backup.element }}"
+    _backup_file_suffix: "tar.gz"
+    
+- name: Generate the backup file path
+  set_fact:
+    _backup_file_path: "{{ _run_temp_dir.path }}/{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}"
+
+- name: Create backup on pantheon if so configured
+  shell: >
+    {{ pantheon_backup.terminusPath | default('terminus') }} backup:create
+    --element={{ _backup.element }} 
+    --no-interaction
+    --yes
+    {{ _source.site_id }}.{{ _backup.env }}
+  register: _pantheon_backup_result
+  until: _pantheon_backup_result.rc == 0
+  retries: "{{ _backup.retryCount | default(3) }}"
+  delay: "{{ _backup.retryDelay | default(30) }}"
+  when:
+    - _backup.createBackupNow | default(false) == true
+
+- name: Download the latest backup from Pantheon
+  shell: >
+    {{ pantheon_backup.terminusPath | default('terminus') }} backup:get 
+    --element={{ _backup.element }} 
+    --to={{ _backup_file_path }}
+    {{ _source.site_id }}.{{ _backup.env }}
+  register: _pantheon_download_result
+  until: _pantheon_download_result.rc == 0
+  retries: "{{ _source.retryCount | default(3) }}"
+  delay: "{{ _source.retryDelay | default(30) }}"
+
+- name: Send backup to remotes                                                        
+  include_tasks: 
+    file: "\
+      {% if _remote.type == 's3' %}\
+      s3.yml\
+      {% elif _remote.type == 'sftp' %}\
+      sftp.yml\
+      {% endif %}"
+  loop: "{{ _backup.targets | default([]) }}"                                         
+  loop_control:                                                                            
+    label: "{{ _target.remote }}"
+    loop_var: _target
+  vars:                                                                                    
+    _remote: "{{ pantheon_backup.remotes[_target.remote] }}"                          
+  when:                                                                                    
+    - _target.remote is defined                                                             
+    - _target.disabled | default(false) == false                                          
+    - pantheon_backup.remotes[_target.remote] is defined                               
+    - pantheon_backup.remotes[_target.remote].type is defined 
+
