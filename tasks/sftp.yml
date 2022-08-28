@@ -28,7 +28,7 @@
   when:
     - _target.path is defined
 
-- name: Rotate files if a retainCount is set.
+- name: Rotate files on sftp if a retainCount is set
   shell: >
     ssh
     -i {{ _run_temp_dir.path }}/{{ _remote.keyFile | basename }}
@@ -44,7 +44,7 @@
     - _target.retainCount | default(1) > 1
   ignore_errors: true
 
-- name: Upload the backup.
+- name: Upload the backup via sftp
   shell: >
     scp
     -o "StrictHostKeyChecking=no"

@@ -57,6 +57,12 @@
     _backup_file_prefix: "{{ _source.site_id }}.{{ _backup.env }}.{{ _backup.element }}"
     _backup_file_suffix: "tar.gz"
     
+- name: Create a temp directory to hold the backup
+  tempfile:
+    state: directory
+    prefix: "pantheon-backup"
+  register: _run_temp_dir
+
 - name: Generate the backup file path
   set_fact:
     _backup_file_path: "{{ _run_temp_dir.path }}/{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}"
@@ -105,6 +111,11 @@
     - _target.disabled | default(false) == false                                          
     - pantheon_backup.remotes[_target.remote] is defined                               
     - pantheon_backup.remotes[_target.remote].type is defined
+
+- name: Clean up from the backup
+  file:
+    path: "{{ _run_temp_dir.path }}"
+    state: absent
 
 - include_tasks: "httpPing.yml"
 

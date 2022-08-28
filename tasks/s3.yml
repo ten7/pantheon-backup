@@ -4,7 +4,7 @@
   when:
     - pantheon_backup.debug | default(false) == true
 
-- name: Rotate files if a retainCount is set.
+- name: Rotate files on S3 if a retainCount is set.
   shell: >
     s3cmd mv
     {% if _remote.endpoint is defined %}

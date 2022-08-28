@@ -7,14 +7,6 @@
     - pantheon_backup.sources | default([]) | length < 1
     - pantheon_backup.destinations | default([]) | length < 1
     - pantheon_backup.backups | default([]) | length < 1
-
-- name: Create a temp directory to hold the backup
-  tempfile:
-    state: directory
-    prefix: "pantheon-backup"
-  register: _run_temp_dir
-  notify:
-    - delete temp items
     
 - name: Do backup
   include_tasks: "backup.yml"
