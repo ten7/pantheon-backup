@@ -25,4 +25,5 @@
     loop_var: _backup
   when:
     - _backup.disabled | default(false) != true
+  ignore_errors: "{{ pantheon_backup.stopOnFailure | default(false) | bool }}"
 

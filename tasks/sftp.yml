@@ -55,4 +55,3 @@
     {{ _backup_file_path }}
     {{ _remote.user }}@{{ _remote.host }}:{% if _target.path is defined %}{{ _target.path }}/{% endif %}{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}
 
-- include_tasks: "httpPing.yml"

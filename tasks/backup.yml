@@ -9,6 +9,8 @@
     - _backup.remotes | default([]) | length < 1
 
 - debug: var=_backup
+  when:
+    - pantheon_backup.debug | default(false) == true
 
 - name: Check if the source configuration exists
   fail:
@@ -102,5 +104,7 @@
     - _target.remote is defined                                                             
     - _target.disabled | default(false) == false                                          
     - pantheon_backup.remotes[_target.remote] is defined                               
-    - pantheon_backup.remotes[_target.remote].type is defined 
+    - pantheon_backup.remotes[_target.remote].type is defined
+
+- include_tasks: "httpPing.yml"
 

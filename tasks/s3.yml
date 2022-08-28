@@ -70,4 +70,3 @@
       {% endif %}"
   no_log: "{{ pantheon_backup.debug | default(false) | ternary(false, true) }}"
 
-- include_tasks: "httpPing.yml"

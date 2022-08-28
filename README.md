@@ -28,6 +28,7 @@ This role requires one dictionary as configuration, `pantheon_backup`:
     pantheon_backup:
       terminusPath: "/usr/local/bin/terminus"
       debug: true
+      stopOnFailure: false
       sources: {}
       remotes: {}
       backups: []
@@ -36,6 +37,7 @@ This role requires one dictionary as configuration, `pantheon_backup`:
 Where:
 * **terminusPath** is the full path to the `terminus` executable. Optional, defaults to `terminus`.
 * **debug** is `true` to enable debugging output. Optional, defaults to `false`.
+* **stopOnFailure** is `true` to stop the entire role if any one backup fails. Optional, defaults to `false`.
 * **sources** is a dictionary of sites and environments. Required.
 * **remotes** is a dictionary of remote upload locations. Required.
 * **backups** is a list of backups to perform. Required.
