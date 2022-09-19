@@ -7,9 +7,11 @@
 - name: Rotate files on S3 if a retainCount is set.
   shell: >
     s3cmd mv
-    {% if _remote.endpoint is defined %}
-    --host={{ _remote.endpoint }}
-    --host-bucket={{ _remote.bucket }}.{{ _remote.endpoint }}
+    {% if _backup.endpoint is defined %}
+    --host={{ _backup.endpoint }}
+    {% endif %}
+    {% if _backup.endpoint is defined %}
+    --host-bucket={{ _backup.hostBucket }}
     {% endif %}
     --access_key={{ _access_key }}
     --secret_key={{ _secret_key }}
@@ -52,7 +54,7 @@
     object: "{{ _target.path | default('') }}/{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}"
     src: "{{ _backup_file_path }}"
     mode: put
-    s3_url: "{{ _remote.endpoint | default(omit) }}"
+    s3_url: "{{ _backup.s3Url | default(omit) }}"
     region: "{{ _remote.region | default(omit) }}"
     encrypt: no
     permission: private

@@ -35,12 +35,12 @@ This role requires one dictionary as configuration, `pantheon_backup`:
 ```
 
 Where:
-* **terminusPath** is the full path to the `terminus` executable. Optional, defaults to `terminus`.
-* **debug** is `true` to enable debugging output. Optional, defaults to `false`.
-* **stopOnFailure** is `true` to stop the entire role if any one backup fails. Optional, defaults to `false`.
-* **sources** is a dictionary of sites and environments. Required.
-* **remotes** is a dictionary of remote upload locations. Required.
-* **backups** is a list of backups to perform. Required.
+* `terminusPath` is the full path to the `terminus` executable. Optional, defaults to `terminus`.
+* `debug` is `true` to enable debugging output. Optional, defaults to `false`.
+* `stopOnFailure` is `true` to stop the entire role if any one backup fails. Optional, defaults to `false`.
+* `sources` is a dictionary of sites and environments. Required.
+* `remotes` is a dictionary of remote upload locations. Required.
+* `backups` is a list of backups to perform. Required.
 
 ### Specifying Sources
 
@@ -57,11 +57,11 @@ pantheon_backup:
 ```
 
 Where, in each entry:
-* **site_id** is the Pantheon site ID. Required.
-* **machineTokenFile** is the path to a file containing the Pantheon machine token. Optional if `machineToken` is specified.
-* **machineToken** contains the Pantheon Machine token. Ignored if `machineTokenFile` is specified.
-* **retryCount** is the number of time to retry `terminus` commands if they fail. Optional, defaults to `3`.
-* **retryDelay** is the time in seconds to wait before retrying a failed `terminus` command. Optional, defaults to `30`.
+* `site_id` is the Pantheon site ID. Required.
+* `machineTokenFile` is the path to a file containing the Pantheon machine token. Optional if `machineToken` is specified.
+* `machineToken` contains the Pantheon Machine token. Ignored if `machineTokenFile` is specified.
+* `retryCount` is the number of time to retry `terminus` commands if they fail. Optional, defaults to `3`.
+* `retryDelay` is the time in seconds to wait before retrying a failed `terminus` command. Optional, defaults to `30`.
 
 ### Specifying remotes
 
@@ -77,6 +77,8 @@ In this role "remotes" are upload destinations for backups. This role supports S
               bucket: "my-s3-bucket"
               accessKeyFile: "/path/to/aws-s3-key.txt"
               secretKeyFile: "/path/to/aws-s3-secret.txt"
+              hostBucket: "my-example-bucket.s3.example.com"
+              s3Url: "https://my-example-bucket.s3.example.com"
               region: "us-east-1"
             sftp.example.com:
               type: "sftp"
@@ -87,19 +89,21 @@ In this role "remotes" are upload destinations for backups. This role supports S
 ```
 
 For `s3` type remotes:
-* **bucket** is the name of the S3 bucket. 
-* **accessKeyFile** is the path to a file containing the access key. Optional if `accessKey` is specified.
-* **accessKey** is the value of the access key necessary to access the bucket. Ignored if `accessKeyFile` is specified.
-* **secretKeyFile** is the path to a file containing the secret key. Optional if `secretKey` is specified.
-* **secretKey** is the value of the access key necessary to secret the bucket. Ignored if `secretKeyFile` is specified.
-* **region** is the AWS region in which the bucket resides. Required if using AWS S3, may be optional for other providers.
-* **endpoint** is the S3 endpoint to use. Optional if using AWS, required for other providers.
+* `bucket` is the name of the S3 bucket. 
+* `accessKeyFile` is the path to a file containing the access key. Optional if `accessKey` is specified.
+* `accessKey` is the value of the access key necessary to access the bucket. Ignored if `accessKeyFile` is specified.
+* `secretKeyFile` is the path to a file containing the secret key. Optional if `secretKey` is specified.
+* `secretKey` is the value of the access key necessary to secret the bucket. Ignored if `secretKeyFile` is specified.
+* `hostBucket` is the hostname of the bucket, typically `bucketName.s3EndPointHostname.tld`. Required if not using AWS.
+* `s3Url` is the full URL to the S3 bucket, including protocol, typically `https://bucketName.s3EndPointHostname.tld`. Required if not using AWS.
+* `region` is the AWS region in which the bucket resides. Required if using AWS S3, may be optional for other providers.
+* `endpoint` is the S3 endpoint to use. Optional if using AWS, required for other providers.
 
 For `sftp` type remotes:
-* **host** is the hostname of the SFTP server. Required.
-* **user** is the username necessary to login to the SFTP server. Required.
-* **keyFile** is the path to a file containing the SSH private key. Required.
-* **pubKeyFile** si the path to a file containing the SSH public key. Required.
+* `host` is the hostname of the SFTP server. Required.
+* `user` is the username necessary to login to the SFTP server. Required.
+* `keyFile` is the path to a file containing the SSH private key. Required.
+* `pubKeyFile` si the path to a file containing the SSH public key. Required.
 
 ### Specifying backups
 
@@ -117,12 +121,12 @@ pantheon_backup:
 ```
 
 Where:
-* **name** is the display name of the backup. Optional, but makes the logs easier.
-* **source** is the name of the key under `pantheon_backups.sources` from which to generate the backup. Required.
-* **env** is the Pantheon environment to backup. Required.
-* **element** is the element to backup. This can be `all`, `database`, `files`, `code`, or `db`. Required.
-* **disabled** is `true` to disable (skip) the backup. Optional, defaults to `false`.
-* **targets** is a list of remotes and additional destination information about where to upload backups. Required.
+* `name` is the display name of the backup. Optional, but makes the logs easier.
+* `source` is the name of the key under `pantheon_backups.sources` from which to generate the backup. Required.
+* `env` is the Pantheon environment to backup. Required.
+* `element` is the element to backup. This can be `all`, `database`, `files`, `code`, or `db`. Required.
+* `disabled` is `true` to disable (skip) the backup. Optional, defaults to `false`.
+* `targets` is a list of remotes and additional destination information about where to upload backups. Required.
 
 ### Backup targets
 
@@ -145,9 +149,9 @@ pantheon_backup:
 ```
 
 Where:
-* **remote** is the key under `pantheon_backup.remotes` to use when uploading the backup. Required.
-* **path** is the path on the remote to upload the backup. Optional.
-* **disabled** is `true` to skip uploading to the specifed `remote`. Optional, defaults to `false`.
+* `remote` is the key under `pantheon_backup.remotes` to use when uploading the backup. Required.
+* `path` is the path on the remote to upload the backup. Optional.
+* `disabled` is `true` to skip uploading to the specifed `remote`. Optional, defaults to `false`.
 
 ### Rotating backups
 
@@ -172,7 +176,7 @@ pantheon_backup:
 ```
 
 Where:
-* **retainCount** is the total number of backups to retain in the directory. Optional. Defaults to `1`, or no rotation.
+* `retainCount` is the total number of backups to retain in the directory. Optional. Defaults to `1`, or no rotation.
 
 During a backup, if `retainCount` is set:
 1. The backup with the ending `&lt;retainCount - 1&gt;.tar.gz` is deleted.
@@ -183,7 +187,7 @@ This feature works both in S3 and SFTP.
 
 ### Creating a backup when the role runs
 
-By default, this role does **not** create a backup when it runs. For live sites on Pantheon, scheduled backups are already configured for the `live` environment. This removes the need for this role to wait and generate the backup on Pantheon prior to downloading it.
+By default, this role does `not` create a backup when it runs. For live sites on Pantheon, scheduled backups are already configured for the `live` environment. This removes the need for this role to wait and generate the backup on Pantheon prior to downloading it.
 
 In some cases, however, you may need to force Pantheon to create the backup from this role on demand. In that case, you can use the `createBackupNow` when defining you backup:
 
@@ -200,7 +204,7 @@ pantheon_backup:
 ```
 
 Where:
-* **createBackupNow** is `true` to instruct the role to create a new backup on demand. Optional, defaults to `false`.
+* `createBackupNow` is `true` to instruct the role to create a new backup on demand. Optional, defaults to `false`.
 
 It is highly recommended to rely on Pantheon's scheduled backups and set this option to `false` in except in special circumstances.
 
