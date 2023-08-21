@@ -58,6 +58,10 @@
     region: "{{ _remote.region | default(omit) }}"
     encrypt: no
     permission: private
+    retry: "{{ _backup.retries | default(omit) }}"
+    delay: "{{ _backup.retryDelay | default(omit) }}"
+    register: _result
+    until: _result.rc == 0
     aws_access_key: "\
       {% if _remote.accessKeyFile is defined %}\
       {{ lookup('file', _remote.accessKeyFile) }}\

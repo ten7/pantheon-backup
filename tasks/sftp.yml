@@ -2,7 +2,7 @@
 - debug:
     var: _remote
   when:
-    - pantheon_backup.debug | default(false) == true
+    - mysql_backup.debug | default(false) == true
 
 - name: Copy identity files to our temp directory
   copy:
@@ -54,4 +54,7 @@
     -P {{ _remote.port | default('22') }}
     {{ _backup_file_path }}
     {{ _remote.user }}@{{ _remote.host }}:{% if _target.path is defined %}{{ _target.path }}/{% endif %}{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}
-
+  retry: "{{ _backup.retries | default(omit) }}"
+  delay: "{{ _backup.retryDelay | default(omit) }}"
+  register: _result
+  until: _result.rc == 0
