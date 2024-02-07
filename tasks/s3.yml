@@ -7,14 +7,14 @@
 - name: Rotate files on S3 if a retainCount is set.
   shell: >
     s3cmd mv
-    {% if _backup.endpoint is defined %}
-    --host={{ _backup.endpoint }}
+    {% if _remote.host is defined %}
+    --host={{ _remote.host | quote }}
     {% endif %}
-    {% if _backup.endpoint is defined %}
-    --host-bucket={{ _backup.hostBucket }}
+    {% if _remote.hostBucket is defined %}
+    --host-bucket={{ _remote.hostBucket | quote }}
     {% endif %}
-    --access_key={{ _access_key }}
-    --secret_key={{ _secret_key }}
+    --access_key={{ _access_key | quote }}
+    --secret_key={{ _secret_key | quote }}
     --acl-private
     s3://{{ _src_path }} s3://{{ _dest_path }}
   loop: "{{ range(((_target.retainCount | default(1)) -2), -1, -1) }}"
@@ -49,30 +49,36 @@
   no_log: "{{ pantheon_backup.debug | default(false) | ternary(false, true) }}"
 
 - name: Push backup to S3
-  amazon.aws.aws_s3:
-    bucket: "{{ _remote.bucket }}"
-    object: "{{ _target.path | default('') }}/{{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}"
-    src: "{{ _backup_file_path }}"
-    mode: put
-    s3_url: "{{ _backup.s3Url | default(omit) }}"
-    region: "{{ _remote.region | default(omit) }}"
-    encrypt: no
-    permission: private
-    retry: "{{ _backup.retries | default(omit) }}"
-    delay: "{{ _backup.retryDelay | default(omit) }}"
-    register: _result
-    until: _result.rc == 0
-    aws_access_key: "\
+  shell: >
+    s3cmd put
+    {% if _remote.host is defined %}
+    --host={{ _remote.host | quote }}
+    {% endif %}
+    {% if _remote.hostBucket is defined %}
+    --host-bucket={{ _remote.hostBucket | quote }}
+    {% endif %}
+    --access_key={{ _access_key | quote }}
+    --secret_key={{ _secret_key | quote }}
+    --acl-private
+    {{ _backup_file_path }} s3://{{ _dest_path }}
+  vars:
+    _access_key: "\
       {% if _remote.accessKeyFile is defined %}\
       {{ lookup('file', _remote.accessKeyFile) }}\
       {% else %}\
       {{ _remote.accessKey | default(omit) }}\
       {% endif %}"
-    aws_secret_key: "\
+    _secret_key: "\
       {% if _remote.secretKeyFile is defined %}\
       {{ lookup('file', _remote.secretKeyFile) }}\
       {% else %}\
-      {{ _remote.secretKey | default(omit) }}\
+      {{ _backup.secretKey | default(omit) }}\
       {% endif %}"
+    _dest_path: "\
+      {{ _remote.bucket }}/\
+      {% if _target.path is defined %}\
+      {{ _target.path }}/\
+      {% endif %}\
+      {{ _backup_file_prefix }}-0.{{ _backup_file_suffix }}"
   no_log: "{{ pantheon_backup.debug | default(false) | ternary(false, true) }}"
 

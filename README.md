@@ -77,8 +77,8 @@ In this role "remotes" are upload destinations for backups. This role supports S
               bucket: "my-s3-bucket"
               accessKeyFile: "/path/to/aws-s3-key.txt"
               secretKeyFile: "/path/to/aws-s3-secret.txt"
+              host: "s3.example.com"
               hostBucket: "my-example-bucket.s3.example.com"
-              s3Url: "https://my-example-bucket.s3.example.com"
               region: "us-east-1"
             sftp.example.com:
               type: "sftp"
@@ -94,8 +94,8 @@ For `s3` type remotes:
 * `accessKey` is the value of the access key necessary to access the bucket. Ignored if `accessKeyFile` is specified.
 * `secretKeyFile` is the path to a file containing the secret key. Optional if `secretKey` is specified.
 * `secretKey` is the value of the access key necessary to secret the bucket. Ignored if `secretKeyFile` is specified.
-* `hostBucket` is the hostname of the bucket, typically `bucketName.s3EndPointHostname.tld`. Required if not using AWS.
-* `s3Url` is the full URL to the S3 bucket, including protocol, typically `https://bucketName.s3EndPointHostname.tld`. Required if not using AWS.
+* `host` is the hostname of the bucket, typically `s3EndPointHostname.tld`. Required if not using AWS. See the s3cmd documentation for examples.
+* `hostBucket` is the hostname of the bucket, typically `%(bucket).s3EndPointHostname.tld`. Required if not using AWS. See the s3cmd documentation for examples.
 * `region` is the AWS region in which the bucket resides. Required if using AWS S3, may be optional for other providers.
 * `endpoint` is the S3 endpoint to use. Optional if using AWS, required for other providers.
 
