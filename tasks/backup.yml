@@ -57,10 +57,18 @@
     _backup_file_prefix: "{{ _source.site_id }}.{{ _backup.env }}.{{ _backup.element }}"
     _backup_file_suffix: "tar.gz"
     
+- name: Ensure the cachePath exists
+  file:
+    state: directory
+    path: "{{ pantheon_backup.cachePath }}"
+  when:
+    - pantheon_backup.cachePath | default('') != ''
+ 
 - name: Create a temp directory to hold the backup
   tempfile:
     state: directory
     prefix: "pantheon-backup"
+    path: "{{ pantheon_backup.cachePath | default(omit) }}"
   register: _run_temp_dir
 
 - name: Generate the backup file path

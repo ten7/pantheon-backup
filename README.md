@@ -27,6 +27,7 @@ This role requires one dictionary as configuration, `pantheon_backup`:
 ```yaml
     pantheon_backup:
       terminusPath: "/usr/local/bin/terminus"
+      cachePath: "/var/tmp"
       debug: true
       stopOnFailure: false
       sources: {}
@@ -36,6 +37,7 @@ This role requires one dictionary as configuration, `pantheon_backup`:
 
 Where:
 * `terminusPath` is the full path to the `terminus` executable. Optional, defaults to `terminus`.
+* `cachePath` is the full path to use as a cache directory for backups. Optional, defaults to the system temporary directory.
 * `debug` is `true` to enable debugging output. Optional, defaults to `false`.
 * `stopOnFailure` is `true` to stop the entire role if any one backup fails. Optional, defaults to `false`.
 * `sources` is a dictionary of sites and environments. Required.
